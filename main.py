@@ -7,9 +7,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 updater = Updater(token='905653274:AAHrZ0mPd2LnZ2joBDtHMEnsIbrdueTYRiU')
 
 
-def start(update, context):
-    logging.info("update is {}, context is {}".format(type(update), type(context)))
-    context.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
+def start(bot, update):
+    bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
 
 
 start_handler = CommandHandler('start', start)
