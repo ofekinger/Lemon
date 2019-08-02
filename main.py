@@ -7,7 +7,7 @@ from lemon.plugins.start_plugin import StartPlugin
 def main():
     Logger.initialize()
     communicator = TelegramCommunicator()
-    communicator.register_plugin("start", StartPlugin)
+    communicator.register_plugin("start", StartPlugin())
     communicator.start()
 
 
