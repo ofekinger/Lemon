@@ -1,5 +1,8 @@
 #!/usr/bin/python
 from telegram.ext import Updater, CommandHandler
+import logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 updater = Updater(token='905653274:AAHrZ0mPd2LnZ2joBDtHMEnsIbrdueTYRiU')
 
