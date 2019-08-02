@@ -8,7 +8,7 @@ class TelegramCommunicator:
         self.__updater = Updater(TOKEN)
 
     def register_plugin(self, name, plugin):
-        self.__updater.add_handler(CommandHandler(name, plugin.execute))
+        self.__updater.dispatcher.add_handler(CommandHandler(name, plugin.execute))
 
     def start(self):
         self.__updater.start_polling()
