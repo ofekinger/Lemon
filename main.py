@@ -4,6 +4,7 @@ from lemon.database_operations import DatabaseCommunication
 from lemon.logger import Logger
 from lemon.plugins.cat_plugin import CatPlugin
 from lemon.plugins.copycat_plugin import CopycatPlugin
+from lemon.plugins.random_picker_plugin import RandomPickerPlugin
 from lemon.plugins.start_plugin import StartPlugin
 
 
@@ -19,6 +20,7 @@ def main():
     communicator.register_plugin(StartPlugin(comms))
     communicator.register_plugin(CatPlugin(comms))
     communicator.register_plugin(CopycatPlugin(comms))
+    communicator.register_plugin(RandomPickerPlugin(comms))
     communicator.start()
 
 
