@@ -32,10 +32,10 @@ class MovieFinderPlugin(BasePlugin):
             YesPlanetCinema("יס פלאנט - איילון", "1025"),
             YesPlanetCinema("יס פלאנט - ראשון לציון", "1072"),
             RavHenCinema("רב חן - קריית אונו", "1062"),
-            HotCinema("הוט סינמה - פתח תקווה", "14", "1194"),
-            HotCinema("הוט סינמה - כפר סבא", "16", "1197"),
-            RavHenCinema("רב חן - גבעתיים", "1058"),
-            RavHenCinema("רב חן - דיזינגוף", "1071")
+            # HotCinema("הוט סינמה - פתח תקווה", "14", "1194"),
+            # HotCinema("הוט סינמה - כפר סבא", "16", "1197"),
+            # RavHenCinema("רב חן - גבעתיים", "1058"),
+            # RavHenCinema("רב חן - דיזינגוף", "1071")
         ]
 
     def _execute(self):
