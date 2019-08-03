@@ -10,25 +10,26 @@ from lemon.plugins.cinema.yes_planet_cinema import APIResult
 class HotCinema(BaseCinema):
     DATA_API = "https://hotcinema.co.il/theatre_list.aspx?theatresid={cinema_id}&eventdate={date}"
     POSTER_URL = "https://hotcinema.co.il{poster_url}"
-    ORDER_URL = "https://tix.hotcinema.co.il/WebTixsNet/SelectTicketsPageRes.aspx?ec={event_id}"
+    ORDER_URL = "https://hotcinema.co.il/purchase.aspx?theatreid={ticket_theatre_id}&eventid={event_id}"
 
-    def __init__(self, name, cinema_id):
+    def __init__(self, name, cinema_id, ticket_theatre_id):
         self.__cinema_id = cinema_id
+        self.__ticket_theatre_id = ticket_theatre_id
         super(HotCinema, self).__init__(name=name)
 
     def get_movies(self, date):
         return self.__query_website(date).films
 
     def get_screenings(self, movie_name, date):
-        return self.__query_website(date).events
+        return self.__query_website(date, movie_name).events
 
-    def __query_website(self, date):
+    def __query_website(self, date, movie_name=None):
         web_response = requests.get(self.DATA_API.format(cinema_id=self.__cinema_id,
                                                          date=date.strftime("%d/%m/%Y")))
         soup = BeautifulSoup(web_response.content)
         soup_movies = soup.find("div").find("table").find_all("tr", class_="yeshover")
         movies = []
-        screenings = {}
+        movie_screenings = []
         for movie in soup_movies:
             parsed_movie = MovieInfo(
                 name=list(movie.find("td", class_="movie_name_list").find("a").children)[0],
@@ -41,20 +42,20 @@ class HotCinema(BaseCinema):
             )
             movies.append(parsed_movie)
 
-            movie_screenings = []
-            hours = movie.find_all("td", class_="hour")
-            for hour in hours:
-                movie_hour = hour.find("div").find("span").contents
-                event_id = hour.find("div").get("data-eventid")
-                if len(movie_hour) > 0:
-                    movie_screenings.append(ScreeningInfo(
-                        datetime.strptime(date.strftime("%Y/%m/%d {time}".format(time=movie_hour[0])),
-                                          "%Y/%m/%d %H:%M"),
-                        link=self.ORDER_URL.format(event_id=event_id),
-                        attributes=parsed_movie.attributes,
-                        extra_info=" ".join(parsed_movie.attributes)
-                    ))
+            if parsed_movie.name == movie_name:
+                hours = movie.find_all("td", class_="hour")
+                for hour in hours:
+                    movie_hour = hour.find("div").find("span").contents
+                    event_id = hour.find("div").get("data-eventid")
+                    if len(movie_hour) > 0:
+                        movie_screenings.append(ScreeningInfo(
+                            datetime.strptime(date.strftime("%Y/%m/%d {time}".format(time=movie_hour[0])),
+                                              "%Y/%m/%d %H:%M"),
+                            link=self.ORDER_URL.format(ticket_theatre_id=self.__ticket_theatre_id,
+                                                       event_id=event_id),
+                            attributes=parsed_movie.attributes,
+                            extra_info=" ".join(parsed_movie.attributes),
+                            movie=parsed_movie
+                        ))
 
-            screenings[parsed_movie.name] = movie_screenings
-
-            return APIResult(movies, movie_screenings)
+        return APIResult(movies, movie_screenings)

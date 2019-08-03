@@ -1,3 +1,4 @@
+import telegram
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 from lemon.plugins.enforce_types import EnforceTypes
@@ -98,19 +99,42 @@ class BasePlugin:
                               caption=caption,
                               chat_id=chat_id or self.__update.message.chat_id)
 
+    @staticmethod
+    def __build_menu(buttons,
+                     n_cols,
+                     header_buttons=None,
+                     footer_buttons=None):
+        menu = [buttons[i:i + n_cols] for i in range(0, len(buttons), n_cols)]
+        if header_buttons:
+            menu.insert(0, [header_buttons])
+        if footer_buttons:
+            menu.append([footer_buttons])
+        return menu
+
+    @staticmethod
+    def __chunks(l, n):
+        """Yield successive n-sized chunks from l."""
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+
     def _build_menu(self, options, text, reply_prefix=None):
         """
         Builds an interactive menu that sends a callback as soon as the user chooses an option.
         :param text: Text that will be sent before the options.
         :param options: List of options to build the menu from.
         """
-        buttons = [[InlineKeyboardButton(option.text,
-                                         url=option.url,
-                                         switch_inline_query_current_chat=" ".join([reply_prefix, option.text])
-                                         if reply_prefix else option.text)]
+        buttons = [InlineKeyboardButton(option.text,
+                                        url=option.url,
+                                        switch_inline_query_current_chat=" ".join([reply_prefix, option.text])
+                                        if reply_prefix else option.text)
                    for option in options]
 
-        reply_markup = InlineKeyboardMarkup(buttons)
-        self.__bot.send_message(reply_markup=reply_markup,
-                                chat_id=self.__update.message.chat_id,
-                                text=text)
+        number_of_columns = 1
+        try:
+            reply_markup = InlineKeyboardMarkup(self.__build_menu(buttons, number_of_columns))
+            self.__bot.send_message(reply_markup=reply_markup,
+                                    chat_id=self.__update.message.chat_id,
+                                    text=text)
+        except telegram.error.BadRequest:
+            for chunk in self.__chunks(options, 10):
+                self._build_menu(chunk, text, reply_prefix)
