@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import requests
@@ -71,6 +72,7 @@ class YesPlanetCinema(BaseCinema):
             ))
 
         api_response = api_response.json()
+        logging.debug(api_response)
 
         movies = api_response["body"]["films"]
         events = api_response["body"]["events"]

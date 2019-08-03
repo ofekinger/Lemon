@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from lemon.plugins.cinema.cinema import BaseCinema, MovieInfo, ScreeningInfo
@@ -32,6 +33,8 @@ class HotCinema(BaseCinema):
                 requests.status_codes.codes.get(web_response.status_code),
                 self.name
             ))
+
+        logging.debug(web_response.content)
 
         soup = BeautifulSoup(web_response.content)
         soup_movies = soup.find("div").find("table").find_all("tr", class_="yeshover")
