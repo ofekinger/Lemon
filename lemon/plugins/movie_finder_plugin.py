@@ -15,6 +15,7 @@ get_screenings_by_name
 get_movies_by_cinema
 get_cinemas_by_movie
 """
+import logging
 from datetime import datetime
 
 from lemon.plugins.base_plugin import BasePlugin, MenuOption
@@ -32,16 +33,18 @@ class MovieFinderPlugin(BasePlugin):
             YesPlanetCinema("יס פלאנט - איילון", "1025"),
             YesPlanetCinema("יס פלאנט - ראשון לציון", "1072"),
             RavHenCinema("רב חן - קריית אונו", "1062"),
-            # HotCinema("הוט סינמה - פתח תקווה", "14", "1194"),
-            # HotCinema("הוט סינמה - כפר סבא", "16", "1197"),
-            # RavHenCinema("רב חן - גבעתיים", "1058"),
-            # RavHenCinema("רב חן - דיזינגוף", "1071")
+            HotCinema("הוט סינמה - פתח תקווה", "14", "1194"),
+            HotCinema("הוט סינמה - כפר סבא", "16", "1197"),
+            RavHenCinema("רב חן - גבעתיים", "1058"),
+            RavHenCinema("רב חן - דיזינגוף", "1071")
         ]
 
     def _execute(self):
         movies = {}
         cinema_movies = {cinema: cinema.get_movies(datetime.now()) for cinema in self.__cinemas}
+
         for cinema, presenting_movies in cinema_movies.items():
+            logging.debug("{} presents: {}".format(cinema.name, [movie.name for movie in presenting_movies]))
             movies.update({movie.name: movie for movie in presenting_movies if movie.name not in movies.keys()})
 
         movie_found = None
