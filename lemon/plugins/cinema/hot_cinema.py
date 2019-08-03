@@ -26,6 +26,13 @@ class HotCinema(BaseCinema):
     def __query_website(self, date, movie_name=None):
         web_response = requests.get(self.DATA_API.format(cinema_id=self.__cinema_id,
                                                          date=date.strftime("%d/%m/%Y")))
+
+        if web_response.status_code != 200:
+            raise requests.exceptions.HTTPError("Got {} status code when reaching {}".format(
+                requests.status_codes.codes.get(web_response.status_code),
+                self.name
+            ))
+
         soup = BeautifulSoup(web_response.content)
         soup_movies = soup.find("div").find("table").find_all("tr", class_="yeshover")
         movies = []

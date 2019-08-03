@@ -62,7 +62,16 @@ class YesPlanetCinema(BaseCinema):
     def __query_api(self, date: datetime):
         parsed_date = date.strftime("%Y-%m-%d")
         api_response = requests.get(self.DATA_API.format(cinema_id=self.__cinema_id,
-                                                         date=parsed_date)).json()
+                                                         date=parsed_date))
+
+        if api_response.status_code != 200:
+            raise requests.exceptions.HTTPError("Got {} status code when reaching {}".format(
+                requests.status_codes.codes.get(api_response.status_code),
+                self.name
+            ))
+
+        api_response = api_response.json()
+
         movies = api_response["body"]["films"]
         events = api_response["body"]["events"]
 
