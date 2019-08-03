@@ -1,4 +1,5 @@
 import telegram
+import logging
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 from lemon.plugins.enforce_types import EnforceTypes
@@ -132,9 +133,11 @@ class BasePlugin:
         number_of_columns = 1
         try:
             reply_markup = InlineKeyboardMarkup(self.__build_menu(buttons, number_of_columns))
+            logging.debug("Trying to send {} options: {}".format(len(options), options))
             self.__bot.send_message(reply_markup=reply_markup,
                                     chat_id=self.__update.message.chat_id,
                                     text=text)
         except telegram.error.BadRequest:
+            logging.debug("Could not send all options at once")
             for chunk in self.__chunks(options, 10):
                 self._build_menu(chunk, text, reply_prefix)
