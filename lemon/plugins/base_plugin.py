@@ -1,4 +1,12 @@
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+
 from lemon.plugins.enforce_types import EnforceTypes
+
+
+class MenuOption:
+    def __init__(self, text, url=None):
+        self.text = text
+        self.url = url
 
 
 class BasePlugin:
@@ -89,3 +97,20 @@ class BasePlugin:
         self.__bot.send_photo(photo=url,
                               caption=caption,
                               chat_id=chat_id or self.__update.message.chat_id)
+
+    def _build_menu(self, options, text, reply_prefix=None):
+        """
+        Builds an interactive menu that sends a callback as soon as the user chooses an option.
+        :param text: Text that will be sent before the options.
+        :param options: List of options to build the menu from.
+        """
+        buttons = [[InlineKeyboardButton(option.text,
+                                         url=option.url,
+                                         switch_inline_query_current_chat=" ".join([reply_prefix, option.text])
+                                         if reply_prefix else option.text)]
+                   for option in options]
+
+        reply_markup = InlineKeyboardMarkup(buttons)
+        self.__bot.send_message(reply_markup=reply_markup,
+                                chat_id=self.__update.message.chat_id,
+                                text=text)

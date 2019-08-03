@@ -15,7 +15,6 @@ class TelegramCommunicator:
     def register_plugin(self, plugin):
         """
         Adds a plugin to the dispatcher.
-        :param name: The name of the plugin
         :param plugin: The plugin object
         :type plugin: BasePlugin
         """
