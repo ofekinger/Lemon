@@ -54,7 +54,10 @@ class MovieFinderPlugin(BasePlugin):
 
         if movie_found:
             # Send poster
-            self._send_photo(movie_found.poster)
+            try:
+                self._send_photo(movie_found.poster)
+            except Exception:
+                logging.error("Could not send poster with link: {}".format(movie_found.poster))
 
             # Send dates
             self.__handle_screenings(movie_found.name)
