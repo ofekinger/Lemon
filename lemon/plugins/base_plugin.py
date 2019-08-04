@@ -105,6 +105,10 @@ class BasePlugin:
                               caption=caption,
                               chat_id=chat_id or self.__update.message.chat_id)
 
+    def _send_youtube_video(self, url, chat_id=None):
+        self._send_text_message(message="@youtube {}".format(url),
+                                chat_id=chat_id or self.__update.message.chat_id)
+
     @staticmethod
     def __build_menu(buttons,
                      n_cols,

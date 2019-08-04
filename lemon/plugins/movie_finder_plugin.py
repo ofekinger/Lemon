@@ -101,7 +101,7 @@ class MovieFinderPlugin(BasePlugin):
                         break
 
                     try:
-                        self._send_text_message(movie.trailer)
+                        self._send_youtube_video(movie.trailer)
                     except Exception:
                         break
                     else:
