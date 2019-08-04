@@ -100,6 +100,11 @@ class BasePlugin:
                               caption=caption,
                               chat_id=chat_id or self.__update.message.chat_id)
 
+    def _send_video(self, url, caption=None, chat_id=None):
+        self.__bot.send_video(video=url,
+                              caption=caption,
+                              chat_id=chat_id or self.__update.message.chat_id)
+
     @staticmethod
     def __build_menu(buttons,
                      n_cols,

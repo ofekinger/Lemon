@@ -18,6 +18,8 @@ get_cinemas_by_movie
 import logging
 from datetime import datetime
 
+import pytz
+
 from lemon.plugins.base_plugin import BasePlugin, MenuOption
 from lemon.plugins.cinema.hot_cinema import HotCinema
 from lemon.plugins.cinema.rav_hen_cinema import RavHenCinema
@@ -41,7 +43,8 @@ class MovieFinderPlugin(BasePlugin):
 
     def _execute(self):
         movies = {}
-        cinema_movies = {cinema: cinema.get_movies(datetime.now()) for cinema in self.__cinemas}
+        date = datetime.now(tz=pytz.UTC).astimezone(pytz.timezone("Asia/Jerusalem"))
+        cinema_movies = {cinema: cinema.get_movies(date=date) for cinema in self.__cinemas}
 
         for cinema, presenting_movies in cinema_movies.items():
             logging.debug("{} presents: {}".format(cinema.name, [movie.name for movie in presenting_movies]))
@@ -53,23 +56,20 @@ class MovieFinderPlugin(BasePlugin):
                 movie_found = movie
 
         if movie_found:
-            # Send poster
-            try:
-                self._send_photo(movie_found.poster)
-            except Exception:
-                logging.error("Could not send poster with link: {}".format(movie_found.poster))
+            self.__send_poster(cinema_movies.values(), movie_found.name)
+            self.__send_trailer(cinema_movies.values(), movie_found.name)
 
             # Send dates
-            self.__handle_screenings(movie_found.name)
+            self.__handle_screenings(movie_found.name, date)
         else:
             self._build_menu(options=[MenuOption(movie_name) for movie_name in movies.keys()],
                              text="Pick one movie:",
                              reply_prefix=self.NAME)
 
-    def __handle_screenings(self, movie_name):
+    def __handle_screenings(self, movie_name, date):
         screenings = []
         for cinema in self.__cinemas:
-            cinema_screenings = cinema.get_screenings(movie_name, datetime.now())
+            cinema_screenings = cinema.get_screenings(movie_name, date=date)
             for screening in cinema_screenings:
                 screening.cinema = cinema
 
@@ -81,3 +81,28 @@ class MovieFinderPlugin(BasePlugin):
                                                                                extra=screening.extra_info),
                                      url=screening.link)
                           for screening in screenings], "Pick a screening:")
+
+    def __send_poster(self, all_movies, movie_name):
+        for movie_list in all_movies:
+            for movie in movie_list:
+                if movie.name == movie_name:
+                    try:
+                        self._send_photo(movie.poster)
+                    except Exception:
+                        break
+                    else:
+                        return
+
+    def __send_trailer(self, all_movies, movie_name):
+        for movie_list in all_movies:
+            for movie in movie_list:
+                if movie.name == movie_name:
+                    if movie.trailer is None:
+                        break
+
+                    try:
+                        self._send_text_message(movie.trailer)
+                    except Exception:
+                        break
+                    else:
+                        return
