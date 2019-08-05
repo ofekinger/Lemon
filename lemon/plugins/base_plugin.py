@@ -6,9 +6,10 @@ from lemon.plugins.enforce_types import EnforceTypes
 
 
 class MenuOption:
-    def __init__(self, text, url=None):
+    def __init__(self, text, url=None, reply_prefix=None):
         self.text = text
         self.url = url
+        self.reply_prefix = reply_prefix
 
 
 class BasePlugin:
@@ -127,7 +128,7 @@ class BasePlugin:
         for i in range(0, len(l), n):
             yield l[i:i + n]
 
-    def _build_menu(self, options, text, reply_prefix=None):
+    def _build_menu(self, options, text, columns=1):
         """
         Builds an interactive menu that sends a callback as soon as the user chooses an option.
         :param text: Text that will be sent before the options.
@@ -135,13 +136,12 @@ class BasePlugin:
         """
         buttons = [InlineKeyboardButton(option.text,
                                         url=option.url,
-                                        switch_inline_query_current_chat=" ".join([reply_prefix, option.text])
-                                        if reply_prefix else option.text)
+                                        switch_inline_query_current_chat=" ".join([option.reply_prefix, option.text])
+                                        if option.reply_prefix else option.text)
                    for option in options]
 
-        number_of_columns = 1
         try:
-            reply_markup = InlineKeyboardMarkup(self.__build_menu(buttons, number_of_columns))
+            reply_markup = InlineKeyboardMarkup(self.__build_menu(buttons, columns))
             logging.debug("Trying to send {} options: {}".format(len(options), options))
             self.__bot.send_message(reply_markup=reply_markup,
                                     chat_id=self.__update.message.chat_id,
